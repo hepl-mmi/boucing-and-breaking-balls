@@ -31,7 +31,7 @@ export default class Circle {
             if (this.radius > 5) {
                 this.animation.generateChildren(this)
             } else {
-                this.velocityY = 0
+                this.animation.deleteBall(this)
             }
         }
     }

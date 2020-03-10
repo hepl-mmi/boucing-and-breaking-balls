@@ -1,13 +1,14 @@
 import Circle from './Circle.js'
 
 const animation = {
+    startTime: 0,
+    nextBallDelay: 60,
     canvasElt: null,
     ctx: null,
     circles: [],
-    nbCircles: 50,
-    gravity: 0.9,
-    elasticity: 0.81,
-    colors: ['#654c52', '#1e3857', '#d97cdf', '#e87b1b'],
+    gravity: 1,
+    elasticity: 0.91,
+    colors: ['#654c52', '#1e3857', '#d97cdf', '#5FF6B7', '#e87b1b', '#56A6B7', '#A6A6FF', '#56FFB7'],
     init() {
         this.canvasElt = document.createElement('canvas')
         document.body.insertAdjacentElement('afterbegin', this.canvasElt)
@@ -16,19 +17,29 @@ const animation = {
         window.onresize = () => {
             this.resizeCanvas()
         }
-        for (let i = 0; i < this.nbCircles; i++) {
-            this.circles.push(new Circle(this))
-        }
+        //this.ctx.globalAlpha = 0.2
+        this.addBall()
         this.animate()
     },
+    addBall(parent = null) {
+        this.circles.push(new Circle(this, parent))
+    },
     animate() {
-        this.ctx.clearRect(0, 0, this.canvasElt.width, this.canvasElt.height)
-        for (let i = 0; i < this.nbCircles; i++) {
-            this.circles[i].draw()
-        }
         window.requestAnimationFrame(() => {
             this.animate()
         })
+
+        this.ctx.clearRect(0, 0, this.canvasElt.width, this.canvasElt.height)
+        this.startTime++
+        if (this.startTime >= this.nextBallDelay) {
+            this.addBall()
+            this.nextBallDelay = Math.random() * 30
+            this.startTime = 0
+        }
+        this.circles.forEach(circle => {
+            circle.draw()
+        })
+
     },
     resizeCanvas() {
         this.canvasElt.width = window.innerWidth
@@ -37,11 +48,13 @@ const animation = {
     generateChildren(parent) {
         const amount = Math.floor(3 + Math.random() * 5)
         for (let i = 0; i < amount; i++) {
-            this.circles.push(new Circle(this, parent))
+            this.addBall(parent)
         }
-        this.circles.splice(this.circles.indexOf(parent), 1)
-        this.nbCircles = this.circles.length
+        this.deleteBall(parent)
     },
+    deleteBall(ball) {
+        this.circles.splice(this.circles.indexOf(ball), 1)
+    }
 }
 
 animation.init()
